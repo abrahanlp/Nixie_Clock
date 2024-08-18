@@ -8,11 +8,16 @@ uint8_t rtc_flag = 0;
 char rx_buffer[20] = {0};
 uint8_t rx_buffer_index = 0;
 
+byte i = 0;
+byte j = 0;
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("Nixie Clock by FaultyProject"));
   rtc.begin();
   nixies.begin();
+  nixies.high_voltage_switch(1);
+
   set_periodic_int(1000);
 }
 
@@ -46,6 +51,12 @@ void loop(){
             print_help();
           }
           break;
+        
+        case 'N':
+        case 'n':
+          nixies.set_Nixie(rx_buffer[2] - 0x30, rx_buffer[3] - 0x30);
+          break;
+
         default:
           //Invalid command
           print_help();
@@ -62,6 +73,17 @@ void loop(){
     if (rtc.refresh()){
       Serial.println(F("Error on RTC"));
     }
+
+    nixies.set_Nixie(i, j++);
+
+    if(j > 9){
+      j = 0;
+      i++;
+    }
+
+    if(i > 4) {
+      i = 0;
+    }
   }
 }
 
@@ -72,8 +94,8 @@ ISR(TIMER1_COMPA_vect){
   rtc_flag = 1;
 }
 
-/**
-
+/*
+  Set high voltage
 */
 uint8_t set_high_voltage(char hv_set){
   uint8_t error = 0;
@@ -93,7 +115,7 @@ uint8_t set_high_voltage(char hv_set){
   return error;
 }
 
-/**
+/*
   Set RTC date and time
 */
 uint8_t set_clock(char *str_time){
@@ -160,6 +182,7 @@ void print_help(void){
   Serial.println("C DDMMYY-HHmmSS => Set day(DD) month(MM) year(YY) hour(HH) minute(mm) second(SS)");
   Serial.println("V => Print date and time DDMMYY-HHmmSS");
   Serial.println("S x => High Voltage Control, x=1: Turn on. x=0: Turn off");
+  Serial.println("N n x => Set nixie tube n to x");
 }
 
 /*
