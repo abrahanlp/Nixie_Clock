@@ -54,7 +54,7 @@ void loop(){
         
         case 'N':
         case 'n':
-          nixies.set_Nixie(rx_buffer[2] - 0x30, rx_buffer[3] - 0x30);
+          nixies.set_Nixie(rx_buffer[2] - 0x30, rx_buffer[4] - 0x30);
           break;
 
         default:
@@ -72,17 +72,6 @@ void loop(){
     rtc_flag = 0;
     if (rtc.refresh()){
       Serial.println(F("Error on RTC"));
-    }
-
-    nixies.set_Nixie(i, j++);
-
-    if(j > 9){
-      j = 0;
-      i++;
-    }
-
-    if(i > 4) {
-      i = 0;
     }
   }
 }
