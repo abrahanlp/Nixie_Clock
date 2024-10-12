@@ -36,10 +36,6 @@ void NixieDriver::set_Nixie(uint8_t n, uint8_t value){
   int port = 0;
   byte port_clk = 0;
   byte val = 0;
-
-  Serial.print(n, HEX);
-  Serial.print(" ");
-  Serial.println(value, HEX);
   
   if(value > 9){
     value = 10; //NIXIE OFF
@@ -66,14 +62,13 @@ void NixieDriver::set_Nixie(uint8_t n, uint8_t value){
       Serial.println("Wrong tube");
       break;
   }
-
-  Serial.println(val, HEX);
+  
   Wire.beginTransmission(port);
   Wire.write(val);
   Wire.endTransmission();
 
   digitalWrite(port_clk, HIGH);
-  delay(5);
+  delay(1);
   digitalWrite(port_clk, LOW);
 }
 

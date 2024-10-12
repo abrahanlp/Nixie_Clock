@@ -9,10 +9,13 @@ typedef struct rtc_timestamp_t{
     uint8_t second;
     uint8_t minute;
     uint8_t hour;
+    uint8_t week_day;
     uint8_t day;
     uint8_t month;
     uint8_t year;
 
+    uint8_t minute_bcd;
+    uint8_t hour_bcd;
 }rtc_timestamp_t;
 
 class RTC
@@ -24,7 +27,10 @@ class RTC
         void set_time(rtc_timestamp_t timestamp);
         uint8_t get_second(void);
         uint8_t get_minute(void);
+        uint8_t get_minute_bcd(void);
         uint8_t get_hour(void);
+        uint8_t get_hour_bcd(void);
+        uint8_t get_week_day(void);
         uint8_t get_day(void);
         uint8_t get_month(void);
         uint8_t get_year(void);

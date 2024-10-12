@@ -8,14 +8,14 @@ uint8_t rtc_flag = 0;
 char rx_buffer[20] = {0};
 uint8_t rx_buffer_index = 0;
 
-byte i = 0;
-byte j = 0;
-
 void setup() {
   Serial.begin(115200);
   Serial.println(F("Nixie Clock by FaultyProject"));
   rtc.begin();
   nixies.begin();
+  
+  rtc.refresh();
+  set_nixies_time();
   nixies.high_voltage_switch(1);
 
   set_periodic_int(1000);
@@ -72,8 +72,22 @@ void loop(){
     rtc_flag = 0;
     if (rtc.refresh()){
       Serial.println(F("Error on RTC"));
+    }else{
+      if(rtc.get_second() == 0){
+        set_nixies_time();
+      }
     }
   }
+}
+
+/*
+  Set Nixie tubes with HH:mm
+*/
+void set_nixies_time(void){
+  nixies.set_Nixie(3, rtc.get_minute_bcd() & 0x0F);
+  nixies.set_Nixie(2, (rtc.get_minute_bcd() >> 4) & 0x0F);
+  nixies.set_Nixie(1, rtc.get_hour_bcd() & 0x0F);
+  nixies.set_Nixie(0, (rtc.get_hour_bcd() >> 4) & 0x0F);
 }
 
 /*
@@ -110,6 +124,9 @@ uint8_t set_high_voltage(char hv_set){
 uint8_t set_clock(char *str_time){
   rtc_timestamp_t timestamp_tmp = {0};
   char str[5] = {0};
+  uint8_t d = 0;
+  uint8_t m = 0;
+  uint8_t y = 0;
 
   if(str_time[1] != ' ' || str_time[8] != '-' || str_time[15] != 0){
     return 1;
@@ -124,6 +141,9 @@ uint8_t set_clock(char *str_time){
   str[0] = str_time[6];
   str[1] = str_time[7];
   timestamp_tmp.year = atoi(str);
+
+  uint8_t weekday = (d+=m<3 ? y-- : y-2,23*m/9+d+4+y/4-y/100+y/400) % 7;
+
   str[0] = str_time[9];
   str[1] = str_time[10];
   timestamp_tmp.hour = atoi(str);
@@ -157,7 +177,7 @@ void print_hv_status(void){
 void print_time(void){
   char str_t[15] = {0};
 
-  sprintf(str_t, "%02d/%02d/%02d-", rtc.get_day(), rtc.get_month(), rtc.get_year());
+  sprintf(str_t, "%02d/%02d/%02d(%02d)-", rtc.get_day(), rtc.get_month(), rtc.get_year(), rtc.get_week_day());
   Serial.print(str_t);
   sprintf(str_t, "%02d:%02d:%02d\r\n", rtc.get_hour(), rtc.get_minute(), rtc.get_second());
   Serial.print(str_t);
@@ -168,8 +188,8 @@ void print_time(void){
 */
 void print_help(void){
   Serial.println("Nixie Clock by FaultyProject");
-  Serial.println("C DDMMYY-HHmmSS => Set day(DD) month(MM) year(YY) hour(HH) minute(mm) second(SS)");
-  Serial.println("V => Print date and time DDMMYY-HHmmSS");
+  Serial.println("C DDMMYY(ww)-HHmmSS => Set day(DD) month(MM) year(YY) hour(HH) minute(mm) second(SS)");
+  Serial.println("V => Print date and time DDMMYY()-HHmmSS");
   Serial.println("S x => High Voltage Control, x=1: Turn on. x=0: Turn off");
   Serial.println("N n x => Set nixie tube n to x");
 }

@@ -24,9 +24,11 @@ uint8_t RTC::refresh(void){
   Wire.requestFrom(_rtc_add, 8);
 
   _timestamp.second = bcd2bin(Wire.read());
-  _timestamp.minute = bcd2bin(Wire.read());
-  _timestamp.hour = bcd2bin(Wire.read());
-  Wire.read(); // Dummy read to jump week register
+  _timestamp.minute_bcd = Wire.read();
+  _timestamp.minute = bcd2bin(_timestamp.minute_bcd);
+  _timestamp.hour_bcd = Wire.read();
+  _timestamp.hour = bcd2bin(_timestamp.hour_bcd);
+  _timestamp.week_day = Wire.read();
   _timestamp.day = bcd2bin(Wire.read());
   _timestamp.month = bcd2bin(Wire.read());
   _timestamp.year = bcd2bin(Wire.read());
@@ -42,7 +44,7 @@ void RTC::set_time(rtc_timestamp_t timestamp){
   Wire.write(bin2bcd(timestamp.second & 0x7F)); // With & 0x7F clock start to work
   Wire.write(bin2bcd(timestamp.minute));
   Wire.write(bin2bcd(timestamp.hour));
-  Wire.write(0);
+  Wire.write(timestamp.week_day);
   Wire.write(bin2bcd(timestamp.day));
   Wire.write(bin2bcd(timestamp.month));
   Wire.write(bin2bcd(timestamp.year));
@@ -58,8 +60,20 @@ uint8_t RTC::get_minute(void){
   return _timestamp.minute;
 }
 
+uint8_t RTC::get_minute_bcd(void){
+  return _timestamp.minute_bcd;
+}
+
 uint8_t RTC::get_hour(void){
   return _timestamp.hour;
+}
+
+uint8_t RTC::get_hour_bcd(void){
+  return _timestamp.hour_bcd;
+}
+
+uint8_t RTC::get_week_day(void){
+  return _timestamp.week_day;
 }
 
 uint8_t RTC::get_day(void){
