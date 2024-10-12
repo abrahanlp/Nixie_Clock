@@ -67,9 +67,7 @@ class NixieDriver
         void begin(void);
         void high_voltage_switch(uint8_t onOff);
         byte get_high_voltage_status(void);
-        //void set_hour(uint8_t hour);
-        //void set_minutes(uint8_t minutes);
-        void set_Nixie(uint8_t n, uint8_t value);
+        uint8_t set_Nixie(uint8_t n, uint8_t value);
 
     private:
         nixie_driver_t _nixie_driver;

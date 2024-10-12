@@ -1,3 +1,4 @@
+#include <avr/wdt.h>
 #include <stdlib.h>
 #include "nixie_rtc.h"
 #include "nixie_driver.h"
@@ -9,12 +10,17 @@ char rx_buffer[20] = {0};
 uint8_t rx_buffer_index = 0;
 
 void setup() {
+  wdt_enable(WDTO_2S);
+
   Serial.begin(115200);
   Serial.println(F("Nixie Clock by FaultyProject"));
   rtc.begin();
   nixies.begin();
-  
-  rtc.refresh();
+
+  if(rtc.refresh()){
+    system_error(F("RTC setup"));
+  }
+
   set_nixies_time();
   nixies.high_voltage_switch(1);
 
@@ -71,23 +77,42 @@ void loop(){
   if(rtc_flag){
     rtc_flag = 0;
     if (rtc.refresh()){
-      Serial.println(F("Error on RTC"));
+      system_error(F("RTC refresh loop"));
     }else{
       if(rtc.get_second() == 0){
         set_nixies_time();
       }
+
+      wdt_reset();
     }
   }
+}
+
+/*
+  System error
+*/
+void system_error(const __FlashStringHelper *description_error){
+  Serial.print(F("Error->"));
+  Serial.println(description_error);
+  while(1){};
 }
 
 /*
   Set Nixie tubes with HH:mm
 */
 void set_nixies_time(void){
-  nixies.set_Nixie(3, rtc.get_minute_bcd() & 0x0F);
-  nixies.set_Nixie(2, (rtc.get_minute_bcd() >> 4) & 0x0F);
-  nixies.set_Nixie(1, rtc.get_hour_bcd() & 0x0F);
-  nixies.set_Nixie(0, (rtc.get_hour_bcd() >> 4) & 0x0F);
+  if(nixies.set_Nixie(3, rtc.get_minute_bcd() & 0x0F)){
+    system_error(F("Nixie set dec min"));
+  }
+  if(nixies.set_Nixie(2, (rtc.get_minute_bcd() >> 4) & 0x0F)){
+    system_error(F("Nixie set ud min"));
+  }
+  if(nixies.set_Nixie(1, rtc.get_hour_bcd() & 0x0F)){
+    system_error(F("Nixie set dec hour"));
+  }
+  if(nixies.set_Nixie(0, (rtc.get_hour_bcd() >> 4) & 0x0F)){
+    system_error(F("Nixie set ud hour"));
+  }
 }
 
 /*

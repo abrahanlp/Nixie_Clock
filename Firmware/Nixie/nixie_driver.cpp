@@ -32,7 +32,7 @@ void NixieDriver::begin(void){
   }
 }
 
-void NixieDriver::set_Nixie(uint8_t n, uint8_t value){
+uint8_t NixieDriver::set_Nixie(uint8_t n, uint8_t value){
   int port = 0;
   byte port_clk = 0;
   byte val = 0;
@@ -65,11 +65,15 @@ void NixieDriver::set_Nixie(uint8_t n, uint8_t value){
   
   Wire.beginTransmission(port);
   Wire.write(val);
-  Wire.endTransmission();
+  if (Wire.endTransmission() != 0){
+    return 1;
+  }
 
   digitalWrite(port_clk, HIGH);
   delay(1);
   digitalWrite(port_clk, LOW);
+
+  return 0;
 }
 
 void NixieDriver::high_voltage_switch(uint8_t onOff){
