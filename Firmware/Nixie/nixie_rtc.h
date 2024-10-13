@@ -20,24 +20,26 @@ typedef struct rtc_timestamp_t{
 
 class RTC
 {
-    public:
-        RTC(void);
-        void begin(void);
-        uint8_t refresh(void);
-        void set_time(rtc_timestamp_t timestamp);
-        uint8_t get_second(void);
-        uint8_t get_minute(void);
-        uint8_t get_minute_bcd(void);
-        uint8_t get_hour(void);
-        uint8_t get_hour_bcd(void);
-        uint8_t get_week_day(void);
-        uint8_t get_day(void);
-        uint8_t get_month(void);
-        uint8_t get_year(void);
+  public:
+    RTC(void);
+    void begin(void);
+    uint8_t refresh(void);
+    void set_time(rtc_timestamp_t timestamp);
+    uint8_t get_second(void);
+    uint8_t get_minute(void);
+    uint8_t get_minute_bcd(void);
+    uint8_t get_hour(void);
+    uint8_t get_hour_bcd(void);
+    uint8_t get_week_day(void);
+    uint8_t get_day(void);
+    uint8_t get_month(void);
+    uint8_t get_year(void);
+    void set_SQW(uint8_t value);
+    void turn_on_periodic_SQW(void);
 
-    private:
-        int _rtc_add;
-        rtc_timestamp_t _timestamp;
+  private:
+    int _rtc_add;
+    rtc_timestamp_t _timestamp;
 };
 
 /**

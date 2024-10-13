@@ -1,3 +1,4 @@
+#include <Wire.h>
 #include <avr/wdt.h>
 #include <stdlib.h>
 #include "nixie_rtc.h"
@@ -11,9 +12,9 @@ uint8_t rx_buffer_index = 0;
 
 void setup() {
   wdt_enable(WDTO_2S);
-
   Serial.begin(115200);
   Serial.println(F("Nixie Clock by FaultyProject"));
+  Wire.begin();
   rtc.begin();
   nixies.begin();
 
