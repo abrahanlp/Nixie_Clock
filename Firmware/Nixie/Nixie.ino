@@ -56,6 +56,8 @@ void loop(){
         case 's':
           if(set_high_voltage(rx_buffer[2])){
             print_help();
+          }else{
+            set_nixies_time();
           }
           break;
         
